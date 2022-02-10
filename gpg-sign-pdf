@@ -71,5 +71,5 @@ gpg --export -a $GPG_KEY >> $SIGNED
 
 # Clearsign your document
 
-gpg --clearsign $SIGNED
+gpg --local-user $GPG_KEY --clearsign $SIGNED
 mv "$SIGNED".asc $SIGNED
