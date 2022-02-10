@@ -26,19 +26,40 @@ TOSIGN="$1"
 S_PAT="2a2d"
 # GPG_KEY="0x0123456789abcdef"
 
+usage(){
+    cat <<EOF
+gpg-sign-pdf.
+
+Usage:
+    gpg-sign-pdf -k <gpg_key> -i <input_pdf> -o <output_pdf>
+
+Options:
+    -i <input_pdf>   The PDF document you want to sign
+    -o <output_pdf>  The output file name
+    -k <gpg_key>     The gpg-key to use for signing
+EOF
+    exit "$1"
+}
+
+while getopts :hi:o:k: flag
+do
+    case "${flag}" in
+        i ) INPUT_FNAME="${OPTARG}";;
+        o ) OUTPUT_FNAME="${OPTARG}";;
+        k ) GPG_KEY="${OPTARG}";;
+        h ) usage 0 ;;
+        * ) usage 1 ;;
+    esac
+done
 
 # ------------------------------------------------------------------------------------------
 
-if [ -z $TOSIGN ]; then
- echo "usage: $0 file-to-embeed-signature.pdf [output-filename]"
- exit 1
+if [ -z $INPUT_FNAME ]; then
+ usage 1
 fi
 
-if [ ! -z $2 ]; then
- SIGNED="$2"
-
-else
- SIGNED="$(basename -s .pdf $TOSIGN).gpg.asc.pdf"
+if [ -z $OUTPUT_FNAME ]; then
+ OUTPUT_FNAME="$(basename -s .pdf $INPUT_FNAME).signed.pdf"
 
 fi
 
@@ -53,23 +74,23 @@ fi
 
 # ----------
 
-cp $TOSIGN $SIGNED
+cp $INPUT_FNAME $OUTPUT_FNAME
 
 
 # Substitute "\n-"
 
-SUB_PAT="s/\s0a2d\s/ $S_PAT /g"
+SUB_PAT="s/\s0a2d\s/2a2d/g"
 
-xxd $SIGNED > "$SIGNED".xxd
-sed -e "$SUB_PAT" < "$SIGNED".xxd > "$SIGNED".newline.xxd
-xxd -r "$SIGNED".newline.xxd > $SIGNED
-rm "$SIGNED".xxd "$SIGNED".newline.xxd
+xxd $OUTPUT_FNAME > "$OUTPUT_FNAME".xxd
+sed -e "$SUB_PAT" < "$OUTPUT_FNAME".xxd > "$OUTPUT_FNAME".newline.xxd
+xxd -r "$OUTPUT_FNAME".newline.xxd > $OUTPUT_FNAME
+rm "$OUTPUT_FNAME".xxd "$OUTPUT_FNAME".newline.xxd
 
 # Append your public key to pdf
 
-gpg --export -a $GPG_KEY >> $SIGNED
+gpg --export -a $GPG_KEY >> $OUTPUT_FNAME
 
 # Clearsign your document
 
-gpg --local-user $GPG_KEY --clearsign $SIGNED
-mv "$SIGNED".asc $SIGNED
+gpg --local-user $GPG_KEY --clearsign $OUTPUT_FNAME
+mv "$OUTPUT_FNAME".asc $OUTPUT_FNAME
