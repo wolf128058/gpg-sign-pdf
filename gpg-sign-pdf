@@ -21,11 +21,6 @@
 #
 #                                                      d3llf
 
-TOSIGN="$1"
-#ORIG_PAT=0a2d
-S_PAT="2a2d"
-# GPG_KEY="0x0123456789abcdef"
-
 usage(){
     cat <<EOF
 gpg-sign-pdf.
