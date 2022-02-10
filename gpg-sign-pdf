@@ -42,10 +42,8 @@ else
 
 fi
 
-if [ ! -z $GPG_KEY ]; then
-
+if [ -z $GPG_KEY ]; then
  GPG_KEY="$(gpg -K | grep sec | tail -1 | tr -s " " | cut -f 2 -d" " | cut -f 2 -d/)"
-
 fi
 
 if [ ! $(which xxd) ]; then
